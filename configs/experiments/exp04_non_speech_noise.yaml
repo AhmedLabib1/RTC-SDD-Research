@@ -1,0 +1,19 @@
+name: exp04_non_speech_noise
+status: planned
+control: exp00_official_reproduction
+hypothesis: permitted_public_non_speech_noise_improves_robustness
+changed_factor: training.additional_augmentation
+training:
+  additional_augmentation:
+    kind: non_speech_noise
+    source: null  # REQUIRE VERIFIED PUBLIC NON-SPEECH CORPUS AND LICENSE
+    probability: 0.3
+    snr_db_range: [5, 20]
+report:
+  primary_metric: dev_online_macro_f1
+  secondary_metric: fixed_synthetic_noisy_dev_macro_f1
+compliance:
+  external_speech_data: false
+  live_rtc_augmentation: false
+  progress_or_eval_used_for_selection: false
+  model_ensemble: false

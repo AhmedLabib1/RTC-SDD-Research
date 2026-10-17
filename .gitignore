@@ -1,0 +1,35 @@
+# Gated and user-provided RTCFake data. Never commit audio, labels or metadata from the gated repo.
+/data/
+/datasets/
+*.pack
+*.wav
+*.tar
+*.tar.gz
+train_label.txt
+dev_label.txt
+progress.txt
+eval.txt
+*_offline_online_pairs.csv
+# Large pretrained model checkpoints, local outputs, and experiment products
+*.pt
+*.pth
+*.ckpt
+checkpoints/
+outputs/
+runs/
+logs/
+wandb/
+mlruns/
+*.log
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.venv/
+build/
+dist/
+*.egg-info/

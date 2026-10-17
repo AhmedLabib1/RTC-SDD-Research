@@ -1,0 +1,12 @@
+name: exp03_rawboost_off
+status: planned
+control: exp00_official_reproduction
+hypothesis: default_rawboost_may_over_aug_or_under_aug_online_domain
+changed_factor: training.rawboost_enabled
+training:
+  rawboost_enabled: false
+report:
+  primary_metric: dev_online_macro_f1
+compliance:
+  progress_or_eval_used_for_selection: false
+  model_ensemble: false

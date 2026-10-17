@@ -1,0 +1,8 @@
+name: xlsr_nes2net
+frontend: xlsr_300m
+backend: nes2net
+pretrained_checkpoint_env: XLSR_CHECKPOINT
+score_index: 0
+score_semantics: spoof_probability
+upstream_revision: null
+pretrained_checkpoint_sha256: null

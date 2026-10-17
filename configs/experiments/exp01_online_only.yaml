@@ -1,0 +1,13 @@
+name: exp01_online_only
+status: planned
+control: exp00_official_reproduction
+hypothesis: online_only_training_improves_online_dev_generalization
+changed_factor: training.train_views
+training:
+  train_views: [online]
+  note: Match total optimizer steps to control and document resampling policy.
+report:
+  primary_metric: dev_online_macro_f1
+compliance:
+  progress_or_eval_used_for_selection: false
+  model_ensemble: false

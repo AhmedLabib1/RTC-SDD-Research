@@ -1,0 +1,37 @@
+# Reproduction target transcribed from supplied official scripts, NOT a completed run.
+name: exp00_official_reproduction
+hypothesis: reproduce_organizers_xlsr_aasist
+status: planned
+model: configs/models/xlsr_aasist.yaml
+dataset: rtcfake_official_train_dev
+training:
+  train_split: train
+  dev_split: dev
+  train_views: [offline, online]
+  validation_views: [offline, online]
+  sample_rate: 16000
+  max_audio_samples: 64600
+  crop: left
+  padding: repeat
+  rawboost_enabled: true
+  rawboost_algo: 5
+  batch_size: 32  # run_train.sh sets 32; parser default is 16
+  max_epochs: 100
+  early_stop_patience_epochs: 10
+  optimizer: Adam
+  learning_rate: 0.000001
+  weight_decay: 0.0001
+  criterion: CrossEntropyLoss
+  class_weights: [0.1, 0.9]  # spoof=0, bonafide=1
+  select_checkpoint: minimum_dev_loss
+  seed: 1234
+  precision: fp32  # Validate upstream numeric behavior before AMP change.
+  number_of_gpus: 1
+report:
+  primary_metric: dev_online_macro_f1
+  decision_threshold: 0.5
+  extra_metrics: [dev_all_macro_f1, dev_offline_macro_f1, classwise_f1, en_zh_f1]
+compliance:
+  external_speech_data: false
+  progress_or_eval_used_for_selection: false
+  model_ensemble: false

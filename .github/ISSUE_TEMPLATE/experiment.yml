@@ -1,0 +1,28 @@
+name: Controlled experiment
+about: Register a reproducible hypothesis and its dev-only evaluation plan
+labels: [experiment]
+body:
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Hypothesis
+    validations:
+      required: true
+  - type: textarea
+    id: control
+    attributes:
+      label: Baseline/control, changed factor, and planned config
+    validations:
+      required: true
+  - type: textarea
+    id: compliance
+    attributes:
+      label: Allowed resources and held-out data firewall
+    validations:
+      required: true
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Dev metrics and subgroup checks
+    validations:
+      required: true

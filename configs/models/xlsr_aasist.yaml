@@ -1,0 +1,9 @@
+# Planned adapter spec, not automatically instantiable in starter v0.1.
+name: xlsr_aasist
+frontend: xlsr_300m
+backend: aasist
+pretrained_checkpoint_env: XLSR_CHECKPOINT
+score_index: 0
+score_semantics: spoof_probability
+upstream_revision: null  # REQUIRED before model training
+pretrained_checkpoint_sha256: null  # REQUIRED before baseline freeze
