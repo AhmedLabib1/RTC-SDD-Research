@@ -33,3 +33,6 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+
+# Recreated from the tracked upstream pin
+/third_party/official_rtc_sdd/

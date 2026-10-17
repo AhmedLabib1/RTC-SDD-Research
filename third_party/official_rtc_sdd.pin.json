@@ -1,0 +1,5 @@
+{
+  "upstream_url": "https://github.com/JunXue-tech/RTC-SDD.git",
+  "commit_sha": "bb68fcb57672439180b791c43f4496e924efc3c1",
+  "relative_path": "third_party/official_rtc_sdd"
+}
