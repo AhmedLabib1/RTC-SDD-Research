@@ -4,7 +4,7 @@
 
 This repository contains our reproducible workflow for the [RTC-SDD Challenge](https://www.junxue.tech/rtc-sdd-challenge/): RTCFake data validation, model fine-tuning, development-set evaluation, checkpoint management, and Progress-set inference. We use a pinned copy of the [official RTC-SDD baseline](https://github.com/JunXue-tech/RTC-SDD), with our experiment code maintained separately.
 
-> **Project status (19 October 2026):** The training and inference pipelines are implemented. Our first FP32 experiment (P01) completed **one epoch** and generated a valid 30,279-recording Progress submission. Model performance is still below our target; results are reported below without claiming baseline parity.
+> **Project status (19 October 2026):** The P01 XLS-R 300M + AASIST experiment has completed **2 FP32 epochs (9,474 optimizer steps)**. Epoch 2 improved labeled-Dev ROC-AUC but reduced Macro-F1 at the fixed 0.5 threshold. The original P01 Progress submission score is **32.2484**; a different teammate experiment scored **45.6397** (its training provenance remains unaudited). See [P01 two-epoch audit](docs/p01_epoch1_epoch2_audit.md).
 
 ## Model and pipeline
 
@@ -55,7 +55,8 @@ RTC-SDD-Research/
 |   `-- progress_inference_p01.py
 |-- notebooks/
 |   |-- 00_research_setup.ipynb
-|   `-- 01_xlsr_aasist_p01_pipeline.ipynb
+|   |-- 01_xlsr_aasist_p01_pipeline.ipynb
+|   `-- 02_p01_xlsr_aasist_audit_and_epoch2_continuation.ipynb
 |-- tests/
 |-- docs/                    # Detailed technical documentation
 |-- third_party/
@@ -100,7 +101,7 @@ A full run also requires a CUDA-capable GPU, the authorized RTCFake packs, the o
 
 Follow [Environment setup](docs/setup.md) and the scripts in `scripts/setup/`. Do not assume `pip install -e '.[dev]'` alone installs the pinned GPU stack. The original pretrained XLS-R weights and fine-tuned model checkpoints are separate files.
 
-For the Kaggle workflow, see [`notebooks/01_xlsr_aasist_p01_pipeline.ipynb`](notebooks/01_xlsr_aasist_p01_pipeline.ipynb). Training and full inference are **opt-in** so opening the notebook does not start an expensive run.
+For the Kaggle workflow, see [`notebooks/01_xlsr_aasist_p01_pipeline.ipynb`](notebooks/01_xlsr_aasist_p01_pipeline.ipynb). Training and full inference are **opt-in** so opening the notebook does not start an expensive run. The [Epoch 2 audit notebook](notebooks/02_p01_xlsr_aasist_audit_and_epoch2_continuation.ipynb) is an execution-disabled research archive; all historical code cells are opt-in, and training/cloud writes require additional flags.
 
 ## P01 — First completed experiment
 
@@ -132,7 +133,20 @@ We switched to FP32 after FP16/AMP overflow issues during development. The proje
 
 These values were measured on labeled Dev at a **0.5 decision threshold**; they are **not** the official hidden competition score. The low Spoof recall is a major limitation. Class weighting, calibration, and robustness need controlled investigation rather than assumptions.
 
-Two finished competition entries were observed with scores **32.2484** and **45.6397**; their exact experiment/checkpoint attribution has not been verified, so neither is presented here as a confirmed P01 score. See [Results](docs/results.md) and [Evaluation](docs/evaluation.md).
+Official Progress submission `1001718` came from **P01 Epoch 1** and scored **32.2484** (reported by the submitting team member). A different teammate submission `1001603` scored **45.6397**; its code, checkpoint lineage, and training strategy are **not yet verified**. See [Results](docs/results.md) and [Evaluation](docs/evaluation.md).
+
+## P01 — Epoch 2 continuation (completed)
+
+P01 was resumed from its original `last.pt` with optimizer/RNG state intact; the continuation used the same loss `[0.1,0.9]`, FP32, Adam, micro-batch 2, accumulation 8, RawBoost 5, and clipping norm 1.0. **Epoch 2 finished at step 9,474.**
+
+| Saved-checkpoint labeled Dev diagnostic | Epoch 1 | Epoch 2 |
+|---|---:|---:|
+| Overall Macro-F1 @ 0.5 | 0.340536 | 0.317350 |
+| Online Macro-F1 @ 0.5 | 0.360674 | 0.320433 |
+| Spoof Recall @ 0.5 | 0.239579 | 0.194496 |
+| ROC-AUC (Spoof positive) | 0.527068 | **0.578015** |
+
+The serialized **training-time** evaluation numbers differ slightly from fresh inference on the saved `best_*` snapshots. These two sources must not be interchanged. More training improved ranking but not fixed-threshold Macro-F1; **no Epoch 3 or loss ablation has been executed**. Full detail and preserved artifacts: [two-epoch audit report](docs/p01_epoch1_epoch2_audit.md).
 
 ## Checkpoints and recovery
 
@@ -162,6 +176,6 @@ submission.zip
 
 The [documentation hub](docs/README.md) links to the full guides for [architecture](docs/architecture.md), [training](docs/training.md), [reproducibility](docs/reproducibility.md), [experiments](docs/experiments.md), and [troubleshooting](docs/troubleshooting.md).
 
-Our next research priority is **Dev-only error analysis**: inspect score distributions, false negatives, class weighting, and allowed noisy-audio robustness experiments before spending GPU time on another run. Changes should be tested one factor at a time and logged with their source commit, configuration, and checkpoint metadata.
+The Dev-only error analysis is complete through Epoch 2. The next step is a documented budget decision between additional CE-only continuation and controlled exploration (class weighting, eligible general-speech backbones, approved RTC consistency or noise-robustness ideas); these remain **proposals, not completed runs**. Changes should be tested one factor at a time and logged with their source commit, configuration, and checkpoint metadata.
 
 **Data policy:** Never commit gated RTCFake files, private protocols, access tokens, pretrained weights, or generated prediction/checkpoint artifacts. Consult the [challenge rules](https://www.junxue.tech/rtc-sdd-challenge/#rules) before using external resources or changing the submission workflow.

@@ -1,5 +1,8 @@
 # Checkpoints, Hugging Face Backup and Recovery
 
+
+> **Epoch 2 verified addition (19 October 2026):** `experiments/p01_epoch2_continuation/last.pt` is a separate full resume checkpoint at **step 9,474** (post-completion), and `best_dev_loss.pt` is the Epoch 2 model-only checkpoint verified at **epoch 2/step 9,474**. Final `last.pt` and `dev_epoch_002.json` uploads succeeded. Original Epoch 1 checkpoints remain under `experiments/p01_xlsr_aasist_official_like_fp32/`. See [two-epoch audit](p01_epoch1_epoch2_audit.md).
+
 ## 1. Why checkpoint formats matter
 
 The P01 training loop writes two **different** checkpoint categories. Confusing them can silently restart training or cause a resume failure.

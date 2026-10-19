@@ -1,5 +1,8 @@
 # P01 Training: XLS-R 300M + AASIST in FP32
 
+
+> **Epoch 2 update (19 October 2026):** P01 continued using its original FP32 CE settings, Adam/RNG resume state, finished step **9,474**; final checkpoint remote backup verified. The prior 4,737-step epoch-1 run is historical, not the current last training step. No Epoch 3 was run. Training loss improved but fixed-threshold Macro-F1 declined. See [two-epoch audit](p01_epoch1_epoch2_audit.md).
+
 ## 1. Completed experiment versus configuration defaults
 
 The **completed** training milestone is **one full Epoch 1**, not a three-epoch claim. The active P01 JSON may specify `training.epochs = 3` as its default target, but the successful historical Kaggle command used `--epochs 1` to finish the first epoch and evaluate it. Command-line operational overrides are essential when reconstructing what was actually run.

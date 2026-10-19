@@ -1,5 +1,8 @@
 # Reproducibility, Review and Artifact Preservation Checklist
 
+
+> **Completed handoff snapshot (19 October 2026):** Epoch 1 + Epoch 2 checkpoints and paired labeled Dev diagnostics preserved. The output-stripped [archived audit notebook](../notebooks/02_p01_xlsr_aasist_audit_and_epoch2_continuation.ipynb) is opt-in by default. Its original code is historical and **should not be Run All-enabled** to replay expensive training. Raw research ZIP includes per-utterance authorized Dev scores; preserve privately, not in Git. Exact results: [two-epoch audit](p01_epoch1_epoch2_audit.md).
+
 Use this checklist before declaring a research result reproduced or a Kaggle working session safely archived.
 
 ## 1. Source and provenance

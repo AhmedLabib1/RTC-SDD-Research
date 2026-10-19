@@ -1,10 +1,12 @@
 # RTC-SDD Research — Documentation Hub
 
-**Last updated:** 19 October 2026 · **Project:** XLS-R 300M + AASIST speech deepfake detection · **Status:** first FP32 experiment completed; evaluation and improvement ongoing.
+**Last updated:** 19 October 2026 · **Project:** XLS-R 300M + AASIST speech deepfake detection · **Status:** P01 Epochs 1 and 2 completed, full labeled Dev diagnostics saved; exploration pending.
 
 This directory documents the **research project as implemented**, including historical decisions, pinned dependencies, the actual first-epoch experiment, limitations, and how to reproduce the training and prediction workflow. It is intended for teammates, reviewers, and future maintainers.
 
 > **Source of truth:** the runnable Python modules and checked-in JSON configurations take precedence over prose. A number of new files were developed as Kaggle patch datasets and may not yet be committed to the remote Git repository. Check the Git commit and actual files before running commands. Never interpret a proposed experiment or a documented command as a completed result.
+
+> **Latest verified results:** [P01 two-epoch audit and handoff](p01_epoch1_epoch2_audit.md), plus the output-stripped [audit notebook](../notebooks/02_p01_xlsr_aasist_audit_and_epoch2_continuation.ipynb). Historical sections below may still describe the first-epoch milestone.
 
 ## Where to start
 
@@ -24,7 +26,7 @@ This directory documents the **research project as implemented**, including hist
 
 ## Verified project milestone
 
-The `p01_xlsr_aasist_official_like_fp32` training run **finished 1 epoch**: **75,785 Train samples**, **4,737 optimizer updates**, and a full **15,204-sample Dev evaluation**. Online Dev Macro-F1 was **0.362177**, with an overall Dev Macro-F1 of **0.342422** at the fixed 0.5 decision threshold. The model successfully generated a **30,279-entry Progress submission**, but its validation and observed challenge results require improvement.
+The `p01_xlsr_aasist_official_like_fp32` training run originally **finished 1 epoch**: **75,785 Train samples**, **4,737 optimizer updates**, and a full **15,204-sample Dev evaluation**. Online Dev Macro-F1 was **0.362177**, with an overall Dev Macro-F1 of **0.342422** at the fixed 0.5 decision threshold. The model successfully generated a **30,279-entry Progress submission**, and later completed **Epoch 2 (9,474 cumulative optimizer steps)**, with the full [two-epoch analysis](p01_epoch1_epoch2_audit.md). Its detection performance still needs improvement.
 
 Do not treat the local Dev figures as the official clean/noisy weighted leaderboard metric, and do not attribute different team submissions to one checkpoint without retained submission metadata.
 

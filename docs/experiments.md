@@ -4,7 +4,7 @@
 
 Improve a **single-model** speech deepfake detector under the RTC-SDD challenge constraints by changing one factor at a time, measuring Dev behavior, preserving the exact code/config/checkpoint state, and avoiding hidden-set tuning.
 
-This file replaces an outdated plan that said no runnable training/inference existed. We now have a fully trained, evaluated **P01 FP32 Epoch 1** run and a functioning Progress inference/submission pipeline. The performance remains below research goals.
+This file replaces an outdated plan that said no runnable training/inference existed. We now have completed **P01 FP32 Epochs 1 and 2 (9,474 total optimizer steps)**, saved-checkpoint full Dev ROC-AUC diagnostics and a functioning Progress inference/submission pipeline. The performance remains below research goals.
 
 ## 1. Resolve historical experiment ID collisions
 
@@ -23,8 +23,8 @@ To prevent future incorrect comparisons, use unique explicit identifiers such as
 | Official XLS-R+AASIST integration | Implemented and tested | Pinned upstream adapter, trained checkpoint |
 | P00 warmup and v0.5.x GPU smoke | Used during development | Historical checks; not necessary to rerun after every restart |
 | FP16 overflow investigation | Completed diagnostic | Led to FP32 choice; not a performance benchmark |
-| **P01 FP32 training** | **One full epoch completed** | **4,737 optimizer steps**, **75,785 Train** |
-| Full Dev evaluation | Completed | **15,204 Dev**, Online Macro-F1 **0.362177** |
+| **P01 FP32 training** | **Two full epochs completed** | **9,474 cumulative optimizer steps**, **75,785 Train per epoch** |
+| Full Dev evaluation | Completed for Epochs 1 and 2 | **15,204 Dev**, checkpoint ROC-AUC **0.527068 → 0.578015** |
 | HF private checkpoint backups | Completed | `last.pt`, `best_online_f1.pt`, `best_dev_loss.pt` |
 | Progress inference pipeline | Tested and executed | `progress.pack` TAR.GZ, **30,279** score IDs |
 | Official scored submissions | Two observed | Scores **32.2484** and **45.6397**; run attribution unverified |
@@ -32,11 +32,17 @@ To prevent future incorrect comparisons, use unique explicit identifiers such as
 
 ## 3. Critical observations after first epoch
 
+> Epoch 2 is now completed; this first-epoch section is historical. See [P01 two-epoch audit](p01_epoch1_epoch2_audit.md). No class-weight or architecture ablations have been executed.
+
 - **Class imbalance in predicted outcomes:** Spoof recall is approximately **24.17%** on full Dev at threshold 0.5; many true Spoof recordings are labeled Bonafide.
 - Online Macro-F1 **36.22%**, Offline **32.25%**, all Dev **34.24%**.
 - `[0.1, 0.9]` class weights place nine times more per-example loss weight on Bonafide than Spoof; may be relevant, but causal impact is untested.
 - AMP FP16 was numerically unstable in the early setup. FP32 trained successfully, though this may increase resource cost.
 - Noise and language domain gaps remain to be characterized using properly allowed local validation, not unlabeled Progress tuning.
+
+## Epoch 2 controlled continuation — COMPLETED
+
+Same P01 class-weighted CE and training settings; resumed original epoch-1 full checkpoint without restarting optimizer. Final step **9,474**. Training-time weighted Dev loss `0.670940 → 0.657102`, but Online Macro-F1 `0.362177 → 0.323371`. Saved-checkpoint ranking ROC-AUC **0.527068 → 0.578015**; Overall Macro-F1 `0.340536 → 0.317350`. Results are labeled Dev only, not official hidden competition scores. Continuation checkpoint and JSON reports were backed up privately. Exact comparisons: [P01 two-epoch audit](p01_epoch1_epoch2_audit.md).
 
 ## 4. Planned controlled experiments
 

@@ -1,5 +1,8 @@
 # Development Evaluation and Competition Metrics
 
+
+> **Epoch 2 addendum (19 October 2026):** Serialized-checkpoint full Dev evaluation is available for *both* epochs. ROC-AUC **0.527068 → 0.578015**, while Overall Macro-F1 at 0.5 **0.340536 → 0.317350**. Training-time metrics differ slightly from inference snapshots, and should not be mixed. Full subgroup, paired changes and score means are in [two-epoch audit](p01_epoch1_epoch2_audit.md).
+
 ## 1. Terminology and what is measurable
 
 **Local Dev metrics** are computed on the labeled RTCFake Dev protocols. **Competition / hidden leaderboard scores** are calculated on a separate, held-out progress/final set with unknown ground-truth labels. The metrics are *not interchangeable*.

@@ -1,5 +1,7 @@
 # Actual Results and Known Limitations — 19 October 2026
 
+> **Update after completed Epoch 2:** Two complete epochs and saved-checkpoint Dev diagnostics are documented in [P01 two-epoch audit](p01_epoch1_epoch2_audit.md). This document retains the original **Epoch 1** results as a historical benchmark; do not treat its “no extra epoch yet” statements as current.
+
 ## 1. Evidence sources
 
 This report is based on the project's **real** P01 Epoch 1 development results, the observed checkpoint metadata, the successful three-sample Progress inference smoke test, and the displayed Codabench submissions. These sources answer different questions and must be kept separate.
@@ -84,12 +86,12 @@ The challenge interface screenshot showed two `submission.zip` entries with stat
 | `1001718` | `2026-10-19 02:50` | **32.2484** |
 | `1001603` | `2026-10-19 01:44` | **45.6397** |
 
-**Do not infer** from this screenshot alone that both submissions used the same model, that one was an improvement to the other, or even which one belongs to a particular team member. The user indicated two participants contributed separate submissions. Attribution requires preserving a private record of the file hashes, checkpoint hashes, configuration and submitting account.
+**Do not infer** from this screenshot alone that both submissions used the same model, that one was an improvement to the other, or whether the two entries are comparable training runs. The project owner attributed `1001718` (32.2484) to P01 Epoch 1 and `1001603` (45.6397) to another teammate. The latter's training code and checkpoint lineage remain unverified; preserve private file/checkpoint hashes.
 
 ## 7. What cannot be concluded yet
 
 - The official **Clean/Noisy component breakdown** has not been captured here.
-- There is no proof from these results that an extra epoch would improve performance.
+- Historical note as of Epoch 1: an additional epoch had not yet been measured. Epoch 2 is now **completed** and improved ROC-AUC from **0.527068** to **0.578015**, while saved-checkpoint Macro-F1 dropped from **0.340536** to **0.317350**; see [the comparison](p01_epoch1_epoch2_audit.md).
 - There is no controlled ablation proving the `[0.1,0.9]` class weights caused the observed class bias.
 - There is no clean controlled reproduction demonstrating parity with all aspects of the published upstream baseline.
 - Threshold adjustments on hidden Progress feedback are not a compliant way to claim gains if ruled out by the competition protocol; keep the reference threshold at 0.5.

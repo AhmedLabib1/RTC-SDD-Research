@@ -1,5 +1,8 @@
 # Environment Setup and Reproduction Guide
 
+
+> **Updated handoff (19 October 2026):** The source checkout at `08a723467157f220bf4340d52206282bbc79a3e1` was inspected with a clean Git working tree and tracked P01 implementation; the new completed Epoch 2 audit notebook is being added separately. Do not repeat Epoch 1/2 setup/training to reproduce reported metrics if using the verified private checkpoints; use [the two-epoch audit](p01_epoch1_epoch2_audit.md) and intentional checkpoint restoration instead. Historical patch notes below describe earlier development stages.
+
 This is an operational guide to rebuilding the Python and GPU environment after a fresh Kaggle session. It replaces the **obsolete CPU-only / no-training-yet** version of this document. Its intended use is to set up the **existing** experiment, not to rerun its completed epoch.
 
 ## 1. Prerequisites and immutable inputs
