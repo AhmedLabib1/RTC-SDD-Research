@@ -1,7 +1,7 @@
 """Command-line interface for dataset preflight, dev scoring and submissions.
 
-There is deliberately no unverified `train` command in version 0.1.
-Integration with the organizers' Fairseq/XLS-R baseline is Phase 1.
+Fine-tuning is intentionally provided by the separate
+`python -m rtcsdd.training.xlsr_aasist_finetune` entry point.
 """
 
 from __future__ import annotations

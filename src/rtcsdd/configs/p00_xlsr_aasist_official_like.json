@@ -1,0 +1,59 @@
+{
+  "experiment": "p00_xlsr_aasist_official_like",
+  "model": {
+    "architecture": "xlsr2_300m_aasist",
+    "xlsr_trainable": true,
+    "aasist_trainable": true
+  },
+  "data": {
+    "sample_rate": 16000,
+    "audio_length": 64600,
+    "crop": "left",
+    "pad": "repeat",
+    "rawboost": {
+      "enabled": true,
+      "algorithm": 5,
+      "N_f": 5,
+      "nBands": 5,
+      "minF": 20,
+      "maxF": 8000,
+      "minBW": 100,
+      "maxBW": 1000,
+      "minCoeff": 10,
+      "maxCoeff": 100,
+      "minG": 0,
+      "maxG": 0,
+      "minBiasLinNonLin": 5,
+      "maxBiasLinNonLin": 20,
+      "P": 10,
+      "g_sd": 2
+    }
+  },
+  "training": {
+    "epochs": 3,
+    "batch_size": 8,
+    "gradient_accumulation": 2,
+    "optimizer": "adam",
+    "learning_rate": 1e-6,
+    "weight_decay": 1e-4,
+    "lr_scheduler": "none",
+    "class_weights": [0.1, 0.9],
+    "precision": "amp_fp16",
+    "gradient_clip_norm": 1.0,
+    "seed": 1234,
+    "workers": 2,
+    "eval_batch_size": 2,
+    "save_every_optimizer_steps": 1000,
+    "log_every_optimizer_steps": 100,
+    "early_stopping_patience": 10,
+    "max_minutes": 0,
+    "device": "cuda:0"
+  },
+  "evaluation": {
+    "threshold": 0.5,
+    "selection_primary": "online_dev_macro_f1",
+    "selection_official_reference": "dev_loss",
+    "evaluate_full_dev_every_epoch": true,
+    "noisy_proxy_generated": false
+  }
+}

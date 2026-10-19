@@ -1,37 +1,119 @@
-# Experiments and rules
+# Experiment Registry, Past Decisions and Research Roadmap
 
-## Research question
+## Purpose
 
-Can we make a **single** speech-deepfake detector more robust to previously unseen RTC artifacts and noise? The official score weighs clean/noisy Macro-F1 **0.3 / 0.7**, with fixed **0.5** cutoff. For local model choice use labeled **dev online Macro-F1**, plus per-class/EN/ZH/offline diagnostics. A seeded synthetic noisy-dev split may be used as a **secondary** proxy, not a surrogate for the official held-out score.
+Improve a **single-model** speech deepfake detector under the RTC-SDD challenge constraints by changing one factor at a time, measuring Dev behavior, preserving the exact code/config/checkpoint state, and avoiding hidden-set tuning.
 
-## Non-negotiable constraints
+This file replaces an outdated plan that said no runnable training/inference existed. We now have a fully trained, evaluated **P01 FP32 Epoch 1** run and a functioning Progress inference/submission pipeline. The performance remains below research goals.
 
-- Train/select/tune on the permitted **train/dev** data only. No progress/final audio inspection, training, tuning, pseudo-labeling or selection based on leaderboard feedback.
-- No extra speech training data or external anti-spoof checkpoints; document provenance of permissible generic SSL weights. Only compliant **non-speech** external audio for augmentation.
-- Do not upload/stream the official audio to live RTC services or generate extra spoof speech by resynthesis.
-- **No prediction ensembling.** Same-model weight averaging is described as permitted in the FAQ; verify exact eligibility before use.
-- Each submission must use one-model `P(spoof)` scores in `[0,1]`. `spoof=0`, `bonafide=1`; don't tune the official 0.5 threshold. Re-check [rules](https://www.junxue.tech/rtc-sdd-challenge/#rules) and [FAQs](https://www.junxue.tech/rtc-sdd-challenge/#faqs) before submission.
+## 1. Resolve historical experiment ID collisions
 
-## Experiment queue
+There are **two naming systems** in the project's history:
 
-| ID | Hypothesis / controlled change | Priority |
+1. The **planning catalog** historically used `P00` for official replication and `P01` for an online-only ablation.
+2. The **actual implemented training run** is called **`p01_xlsr_aasist_official_like_fp32`**, and it was trained on **both Online and Offline Train**. It was not an online-only ablation.
+
+To prevent future incorrect comparisons, use unique explicit identifiers such as `p01_xlsr_aasist_official_like_fp32_epoch1` for the existing run, and `ablation_online_only_001` for a prospective online-only experiment. Never claim the existing P01 run tested online-only data.
+
+## 2. Milestones already executed
+
+| Milestone | State | Evidence / limits |
 |---|---|---|
-| P00 | Reproduce *unmodified* XLS-R 300M + AASIST baseline; fixed upstream crop, RawBoost, loss, checkpoint policy | First |
-| P01 | Online-only versus all training data (match optimizer-step budget) | High |
-| P02 | Class weights `[0.1,0.9]` vs uniform / inverse-frequency | High |
-| P03 | RawBoost algo 5 on versus off | High |
-| P04 | Allowed non-speech noise augmentation versus none | High |
-| P05 | First-window versus random-window training crop | Medium |
-| P06 | 4.0375 s versus longer audio window | Medium |
-| P07 | Full fine-tuning versus staged XLS-R freeze/unfreeze | Medium |
-| P08 | AASIST versus Nes2Net, separately (no ensemble) | Medium |
-| P09 | Offline/online-pair representation consistency (no assumed sample alignment) | Exploratory |
-| P10 | Allowed same-model-family weight averaging | Medium |
+| CPU protocol and pack validation | Completed previously | Train/Dev protocol counts, representative audio decoding |
+| Official XLS-R+AASIST integration | Implemented and tested | Pinned upstream adapter, trained checkpoint |
+| P00 warmup and v0.5.x GPU smoke | Used during development | Historical checks; not necessary to rerun after every restart |
+| FP16 overflow investigation | Completed diagnostic | Led to FP32 choice; not a performance benchmark |
+| **P01 FP32 training** | **One full epoch completed** | **4,737 optimizer steps**, **75,785 Train** |
+| Full Dev evaluation | Completed | **15,204 Dev**, Online Macro-F1 **0.362177** |
+| HF private checkpoint backups | Completed | `last.pt`, `best_online_f1.pt`, `best_dev_loss.pt` |
+| Progress inference pipeline | Tested and executed | `progress.pack` TAR.GZ, **30,279** score IDs |
+| Official scored submissions | Two observed | Scores **32.2484** and **45.6397**; run attribution unverified |
+| Complete source and notebooks pushed to Git | **Pending verification** | Historical remote repo may not contain Kaggle patch updates |
 
-**Order:** first verify audio input parity, pretrained checkpoint SHA, forward/backward, dev metrics and checkpoint resume; then complete P00. Start controlled ablations only after a trustworthy baseline. Changing multiple factors at once is not a causal ablation.
+## 3. Critical observations after first epoch
 
-## Every experiment must record
+- **Class imbalance in predicted outcomes:** Spoof recall is approximately **24.17%** on full Dev at threshold 0.5; many true Spoof recordings are labeled Bonafide.
+- Online Macro-F1 **36.22%**, Offline **32.25%**, all Dev **34.24%**.
+- `[0.1, 0.9]` class weights place nine times more per-example loss weight on Bonafide than Spoof; may be relevant, but causal impact is untested.
+- AMP FP16 was numerically unstable in the early setup. FP32 trained successfully, though this may increase resource cost.
+- Noise and language domain gaps remain to be characterized using properly allowed local validation, not unlabeled Progress tuning.
 
-`experiment_id`, control/config, hypothesis, data/weight provenance, Git and upstream commit SHAs, Python/CUDA/Fairseq versions, checkpoint SHA256, seed, sample/crop/augmentation and loss settings, budget (steps/epochs/GPU hours), dev online Macro-F1 and subgroups, and final conclusion. Prefer 2–3 seeds for promising runs if compute permits. Keep private outputs outside Git. Every change comes through a reviewed PR and tests.
+## 4. Planned controlled experiments
 
-**Baseline source notes:** upstream uses 64,600-sample first crop, repeat padding, RawBoost for train, weighted CE `[0.1,0.9]`, Adam LR `1e-6` weight decay `1e-4`, and best checkpoint by dev loss. Train shell example uses batch 32, while parser defaults may differ. Confirm exact flags in the pinned source and avoid silent behavior changes. The official score cannot be computed from the normal dev labels alone.
+The list below is **hypotheses**, not achieved gains. Each comparison must hold other training factors and optimizer-step budget fixed.
+
+| Proposed ID | One changed factor | Control | Primary measurement | Priority |
+|---|---|---|---|---|
+| `A01_loss_weights` | `[0.1,0.9]` vs `[1,1]` / valid alternatives | Completed P01 configuration | Online Dev Macro-F1 and Spoof recall | Highest |
+| `A02_data_mix` | Combined Train vs Online-only Train | Original combined dataset | Online Dev Macro-F1 | High |
+| `A03_rawboost` | RawBoost Algo5 enabled/disabled | Enabled | Online Dev + clean diagnostics | High |
+| `A04_legal_noise` | Defined **non-speech** noise augmentation | No additional noise | Legal synthetic noisy Dev proxy | High |
+| `A05_crop` | First crop vs seeded alternative crop | First 64,600 samples | Online Dev and robustness | Medium |
+| `A06_audio_length` | Baseline window vs longer window | 64,600 samples | Quality / VRAM / throughput | Medium |
+| `A07_freeze_schedule` | Full fine-tuning vs staged SSL freezing | Both groups trainable | Macro-F1 per GPU hour | Medium |
+| `A08_alt_architecture` | Single AASIST vs single Nes2Net | AASIST | Matched-budget Dev | Exploratory |
+| `A09_pair_consistency` | Pair-aware representation loss | Plain weighted CE | Dev, no paired leakage | Exploratory |
+| `A10_weights_average` | Allowed same-model weight averaging if rules permit | Best single snapshot | Dev only; check legality | Conditional |
+
+Do not change multiple factors and describe the result as a clean ablation. A three-epoch run with a new sampler and new loss cannot identify which component helped.
+
+## 5. Model-selection and challenge constraints
+
+- Optimize using authorized **Train and labeled Dev** only.
+- Keep **Progress and final Eval held out**: no training, pseudo-labeling, score-based hyperparameter selection, or class threshold fitting from hidden feedback.
+- Challenge score is described as **0.3 clean + 0.7 noisy** F1; our normal Dev JSON does not contain hidden noisy labels.
+- The reference evaluator uses **fixed 0.5 decision threshold**. Investigate calibration on Dev for understanding but do not silently change the competition cutoff.
+- Do not train on unauthorized external speech or use prohibited external anti-spoof checkpoints. Carefully inspect competition rules/FAQ before expanding the data or attempting averaging.
+- Do not presume prediction ensembling is permitted; the intended solution remains a **single model**.
+
+## 6. Definition of a reproducible experiment
+
+Every new experiment should record:
+
+```text
+experiment_id, date, owner
+hypothesis and exactly one changed factor
+Git commit SHA + dirty/clean flag
+pinned upstream commit SHA
+config JSON hash, training-fingerprint hash
+original XLS-R checkpoint SHA256
+Train/Dev dataset revision and counts
+Python, torch, CUDA, Fairseq versions and GPU model
+optimizer/learning rate/schedule/loss weights
+batch size/accumulation, actual steps, seed, run time
+RawBoost/noise source and seeds
+checkpoint metadata + SHA256
+Dev metrics (all/online/offline, EN/ZH, class F1, confusion)
+legal/compliance notes, decision and follow-up
+```
+
+Back up binary checkpoints privately; commit human-readable summaries, config changes, unit tests and source code rather than private audio or large binary artifacts.
+
+## 7. Prioritized next work
+
+**Priority 0 — preservation:** commit the actual FP32 trainer, final configs, score generator and a cleaned reproducible notebook; update docs and verify `git status`. This is independent of model quality.
+
+**Priority 1 — diagnosis without new training:** retain per-ID *authorized Dev* score outputs, check score histograms, mean/variance by class, confusion matrix, language/view subgroups, and whether the low Spoof recall is driven by class weighting or poor discriminative features. Examine noisy-Dev proxy only if constructed from permitted sounds.
+
+**Priority 2 — fair minimal ablation:** first test class weights at matched Train/Dev and optimizer steps, with no simultaneous augmentation or architecture changes. Preserve all reports.
+
+**Priority 3 — training budget:** after evidence justifies it, evaluate an additional epoch versus a fresh controlled alternative. Log GPU hours, memory and cost; do not spend hours rerunning P00 warmups or an already completed epoch due to Kaggle restarts.
+
+## 8. Experiment decision template
+
+```markdown
+### EXPERIMENT_ID
+- Hypothesis:
+- Change from control (exactly one):
+- Code commit + config fingerprint:
+- Dataset and checkpoint provenance:
+- Compute budget:
+- Seed(s):
+- Dev online Macro-F1:
+- Dev subgroup breakdown:
+- Quality / robustness trade-offs:
+- Decision: retain / reject / investigate
+- Next action:
+```
+
+Review organizer [challenge](https://www.junxue.tech/rtc-sdd-challenge/), [rules](https://www.junxue.tech/rtc-sdd-challenge/#rules) and [FAQ](https://www.junxue.tech/rtc-sdd-challenge/#faqs) before any new data or model-family decision.
