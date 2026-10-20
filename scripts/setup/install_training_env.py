@@ -1,4 +1,9 @@
-"""Check or install pinned RTC-SDD training dependencies."""
+"""Validate or explicitly install pinned RTC-SDD dependencies.
+
+--plan-only: CPU-safe, no installation, source checkout optional.
+Default: verify existing Python 3.10 and official source.
+--install: install pinned dependencies into the specified venv.
+"""
 
 from __future__ import annotations
 
@@ -6,126 +11,235 @@ import argparse
 import hashlib
 import json
 import re
-import shlex
 import shutil
 import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).absolute().parents[2]
+sys.path.insert(0, str(ROOT / "src"))
 
-OFFICIAL = ROOT / "third_party" / "official_rtc_sdd"
+from rtcsdd.ops.training_requirements import (
+    FAIRSEQ_SHA,
+    convert_requirements,
+    install_commands,
+)
+
+OFFICIAL = ROOT / "third_party/official_rtc_sdd"
 REQUIREMENTS = OFFICIAL / "requirements.txt"
-PIN_FILE = ROOT / "third_party" / "official_rtc_sdd.pin.json"
-
-TORCH_INDEX = "https://download.pytorch.org/whl/cu121"
+PIN_FILE = ROOT / "third_party/official_rtc_sdd.pin.json"
 
 
-def output(*command: str) -> str:
-    return subprocess.check_output(
-        command, text=True
-    ).strip()
+def command_output(*command: str) -> str:
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout.strip()
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--python", type=Path, required=True)
-    parser.add_argument("--install", action="store_true")
-    args = parser.parse_args()
+def check_python(executable: Path) -> None:
+    if not executable.is_file():
+        raise FileNotFoundError(executable)
 
-    # Preserve the venv path (do not resolve Python symlinks).
-    python = args.python.absolute()
-
-    if not python.is_file():
-        raise FileNotFoundError(python)
-
-    version = output(
-        str(python),
+    version = command_output(
+        str(executable),
         "-c",
-        "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')",
+        "import sys; print("
+        "f'{sys.version_info.major}.{sys.version_info.minor}'"
+        ")",
     )
 
     if version != "3.10":
-        raise RuntimeError(f"Expected Python 3.10, got {version}")
+        raise RuntimeError(
+            f"Python 3.10 required, found {version}"
+        )
 
-    # Verify official source revision.
-    pin = json.loads(PIN_FILE.read_text(encoding="utf-8"))
+    print("[PASS] Python 3.10")
 
-    actual = output(
-        "git", "-C", str(OFFICIAL), "rev-parse", "HEAD"
+
+def check_official() -> str:
+    pin = json.loads(
+        PIN_FILE.read_text(encoding="utf-8")
     )
 
-    if actual != pin["commit_sha"]:
-        raise RuntimeError("Official source commit mismatch")
+    expected = pin["commit_sha"]
 
-    if output("git", "-C", str(OFFICIAL), "status", "--porcelain"):
-        raise RuntimeError("Official source contains local modifications")
+    if not re.fullmatch(r"[0-9a-fA-F]{40}", expected):
+        raise ValueError("Invalid official commit pin")
 
-    # Verify critical dependencies.
-    contents = REQUIREMENTS.read_text(encoding="utf-8")
+    if not REQUIREMENTS.is_file():
+        raise FileNotFoundError(
+            "Official requirements.txt not restored"
+        )
 
-    required_pins = (
-        "torch==2.5.1+cu121",
-        "torchaudio==2.5.1+cu121",
-        "torchvision==0.20.1+cu121",
+    actual = command_output(
+        "git", "-C", str(OFFICIAL),
+        "rev-parse", "HEAD",
     )
 
-    for requirement in required_pins:
-        if requirement not in contents.splitlines():
-            raise RuntimeError(f"Missing pin: {requirement}")
+    if actual.lower() != expected.lower():
+        raise RuntimeError(
+            "Official repository commit mismatch"
+        )
 
-    fairseq = re.findall(
-        r"^-e git\+.*@([a-f0-9]{40})#egg=fairseq$",
-        contents,
-        re.MULTILINE,
+    dirty = command_output(
+        "git", "-C", str(OFFICIAL),
+        "status", "--porcelain",
     )
 
-    if len(fairseq) != 1:
-        raise RuntimeError("Expected one pinned Fairseq dependency")
+    if dirty:
+        raise RuntimeError(
+            "Official repository has local modifications"
+        )
 
-    if shutil.which("uv") is None:
-        raise RuntimeError("uv is not installed")
+    print("[PASS] Official source commit:", actual)
 
-    # Installation commands, shared by check and install modes.
-    commands = [
-        [
-            "uv", "pip", "install",
-            "--python", str(python),
-            "-r", str(REQUIREMENTS),
-            "--extra-index-url", TORCH_INDEX,
-        ],
-        [
-            "uv", "pip", "install",
-            "--python", str(python),
-            "-e", str(ROOT),
-        ],
-        [
-            "uv", "pip", "check",
-            "--python", str(python),
-        ],
-    ]
+    return actual
 
-    print("[PASS] Python:", version)
-    print("[PASS] Official commit:", actual)
-    print("[PASS] Fairseq commit:", fairseq[0])
-    print(
-        "[PASS] Requirements SHA256:",
-        hashlib.sha256(REQUIREMENTS.read_bytes()).hexdigest(),
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=__doc__
     )
 
-    print("\nPlanned commands:")
-    for command in commands:
-        print("$", shlex.join(command))
+    parser.add_argument(
+        "--python",
+        type=Path,
+        required=True,
+    )
 
-    if not args.install:
-        print("\n[CHECK ONLY] No packages installed.")
-        print("[PENDING] Runtime compatibility verification")
+    actions = parser.add_mutually_exclusive_group()
+
+    actions.add_argument(
+        "--plan-only",
+        action="store_true",
+    )
+
+    actions.add_argument(
+        "--install",
+        action="store_true",
+    )
+
+    args = parser.parse_args()
+
+    python = args.python.absolute()
+
+    print("=" * 68)
+    print("RTC-SDD PINNED TRAINING DEPENDENCIES")
+    print("=" * 68)
+
+    print("Python target:", python)
+    print("Fairseq pin  :", FAIRSEQ_SHA)
+
+    # ----------------------------------------------
+    # PLAN ONLY — no requirements downloaded
+    # ----------------------------------------------
+
+    if args.plan_only:
+        print("\n[PLAN ONLY]")
+        print("1. Verify Python 3.10")
+        print("2. Verify pinned official RTC-SDD checkout")
+        print("3. Convert legacy Fairseq requirement in temp")
+        print("4. Install pinned requirements using uv")
+        print("5. Install project and HF checkpoint support")
+        print("6. Run uv pip check")
+
+        print("\n[PASS] No installation executed")
+        print("[PASS] Official source unchanged")
+        print("[PASS] No GPU used")
         return
 
-    for command in commands:
-        subprocess.run(command, check=True)
+    # ----------------------------------------------
+    # Required checks for actual environment
+    # ----------------------------------------------
 
-    print("\n[PASS] Installation commands completed.")
-    print("[PENDING] Model runtime verification")
+    check_python(python)
+    check_official()
+
+    original = REQUIREMENTS.read_bytes()
+
+    converted = convert_requirements(
+        original.decode("utf-8")
+    )
+
+    print("[PASS] Fairseq pin:", FAIRSEQ_SHA)
+    print("[PASS] Requirements conversion validated")
+    print(
+        "[PASS] Original requirements SHA256:",
+        hashlib.sha256(original).hexdigest(),
+    )
+
+    # ----------------------------------------------
+    # Temporary conversion — never edit official
+    # ----------------------------------------------
+
+    with tempfile.TemporaryDirectory(
+        prefix="rtcsdd-requirements-"
+    ) as folder:
+
+        compatible = (
+            Path(folder) / "requirements-uv.txt"
+        )
+
+        compatible.write_text(
+            converted,
+            encoding="utf-8",
+        )
+
+        commands = install_commands(
+            python=python,
+            requirements=compatible,
+            project=ROOT,
+        )
+
+        if not args.install:
+            print("\n[CHECK ONLY] Planned stages:")
+
+            for index, command in enumerate(commands, 1):
+                print(
+                    f"{index}.",
+                    command[0],
+                    command[1],
+                    command[2],
+                )
+
+            print("\n[PASS] No packages installed")
+            return
+
+        if shutil.which("uv") is None:
+            raise RuntimeError(
+                "uv must be installed before --install"
+            )
+
+        print("\n[INSTALL] Executing pinned dependency plan")
+
+        for index, command in enumerate(commands, 1):
+            print(
+                f"\n[STAGE {index}/{len(commands)}]",
+                flush=True,
+            )
+
+            subprocess.run(
+                command,
+                cwd=ROOT,
+                check=True,
+            )
+
+    # Verify that the official requirements remain unchanged.
+    after = REQUIREMENTS.read_bytes()
+
+    if after != original:
+        raise RuntimeError(
+            "Official requirements changed unexpectedly"
+        )
+
+    print("\n[PASS] Pinned dependency installation completed")
+    print("[PASS] Official requirements unchanged")
+    print("[INFO] GPU/model runtime verification still required")
 
 
 if __name__ == "__main__":

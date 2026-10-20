@@ -1,0 +1,22 @@
+{
+  "name": "rtcfake_cpu_development",
+  "branch": "main",
+  "min_free_gib": 2,
+  "repo_files": [
+    "README.md",
+    "pyproject.toml",
+    "src/rtcsdd/data/dataset.py",
+    "src/rtcsdd/training/trainer.py"
+  ],
+  "dataset_files": [
+    "train_label.txt",
+    "dev_label.txt",
+    "train_online.pack",
+    "train_offline.pack",
+    "dev_online.pack",
+    "dev_offline.pack"
+  ],
+  "secrets": [
+    "GITHUB_TOKEN"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "rtcsdd_xlsr_aasist_training",
+  "python_version": "3.10",
+  "packages": {
+    "numpy": "1.26.4",
+    "torch": "2.5.1+cu121",
+    "torchaudio": "2.5.1+cu121",
+    "torchvision": "0.20.1+cu121",
+    "fairseq": "*"
+  }
+}
