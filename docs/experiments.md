@@ -123,3 +123,83 @@ Back up binary checkpoints privately; commit human-readable summaries, config ch
 ```
 
 Review organizer [challenge](https://www.junxue.tech/rtc-sdd-challenge/), [rules](https://www.junxue.tech/rtc-sdd-challenge/#rules) and [FAQ](https://www.junxue.tech/rtc-sdd-challenge/#faqs) before any new data or model-family decision.
+
+<!-- E01-E04 CONTROLLED EXPERIMENTS -->
+
+## E01–E04: Controlled CE, PCL and DNS Ablation
+
+**Status:** Experiment preparation in progress. Results are not yet available.
+
+### Objective
+
+Measure the individual and combined effects of phoneme-level
+consistency learning (PCL) and eligible non-speech DNS noise
+augmentation on RTC-SDD generalization.
+
+| ID | Loss | RawBoost 5 | PCL | DNS Noise |
+|---|---|---|---|---|
+| E01 | Weighted CE | Yes | No | No |
+| E02 | Weighted CE + PCL | Yes | Yes | No |
+| E03 | Weighted CE | Yes | No | Yes |
+| E04 | Weighted CE + PCL | Yes | Yes | Yes |
+
+### Shared Training Controls
+
+- Architecture: XLS-R 300M + AASIST.
+- Initialization: original eligible pretrained XLS-R checkpoint;
+  no continuation from the earlier P01 fine-tuning run.
+- Trainable components: XLS-R backbone and AASIST classifier.
+- Precision: FP32.
+- Optimizer: Adam.
+- Learning rate: 1e-6.
+- Weight decay: 1e-4.
+- Micro-batch size: 2.
+- Gradient accumulation: 8.
+- Effective batch size: 16.
+- Class weights [spoof, bonafide]: [0.1, 0.9].
+- Random seed: 1234.
+- Audio: 16 kHz, 64,600 samples, left crop/repeat padding.
+- RawBoost Algorithm 5: Train only.
+- Decision threshold: fixed at 0.5.
+
+The shared controls must remain aligned across experiments.
+PCL and DNS-specific parameters must be recorded separately.
+
+Equal epoch counts alone may not imply equal training exposure
+when paired PCL batches are introduced. Training steps and data
+exposure must also be audited before comparing results.
+
+### Training Schedule
+
+Each experiment starts with one epoch and undergoes full labeled
+Dev evaluation. Healthy runs continue by restoring the original
+optimizer, scheduler/scaler where applicable, and RNG state.
+
+Initial comparison target: three completed epochs per experiment.
+
+### Evaluation Protocol
+
+- Evaluate the full official labeled Dev split after each epoch.
+- Track Online, Offline, and Overall Dev Macro-F1 at threshold 0.5.
+- Track spoof and bonafide recall, ROC-AUC, and weighted Dev loss.
+- Do not tune using hidden Progress or Final labels/scores.
+- Do not report clean Dev metrics as the official hidden score.
+- Keep checkpoints and predictions isolated by experiment.
+
+### E01 — CE Control
+
+Configuration:
+`src/rtcsdd/configs/e01_ce_control_fp32.json`
+
+Loss: weighted Cross-Entropy without PCL or DNS augmentation.
+
+Checkpoint repository:
+`AhmedLabib1/rtc-sdd-research-checkpoints`
+
+Remote checkpoint prefix:
+`experiments/e01_ce_control_fp32`
+
+Training is configured one epoch at a time, with checkpoint
+restoration for later epochs.
+
+**Execution status:** Configured; training not started.

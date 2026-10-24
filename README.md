@@ -179,3 +179,26 @@ The [documentation hub](docs/README.md) links to the full guides for [architectu
 The Dev-only error analysis is complete through Epoch 2. The next step is a documented budget decision between additional CE-only continuation and controlled exploration (class weighting, eligible general-speech backbones, approved RTC consistency or noise-robustness ideas); these remain **proposals, not completed runs**. Changes should be tested one factor at a time and logged with their source commit, configuration, and checkpoint metadata.
 
 **Data policy:** Never commit gated RTCFake files, private protocols, access tokens, pretrained weights, or generated prediction/checkpoint artifacts. Consult the [challenge rules](https://www.junxue.tech/rtc-sdd-challenge/#rules) before using external resources or changing the submission workflow.
+
+<!-- E01-E04 EXPERIMENT PROGRAM -->
+
+## Current Research Program: E01–E04
+
+The next research phase evaluates four controlled variants of
+XLS-R 300M + AASIST:
+
+- **E01:** Weighted CE + RawBoost 5 (control).
+- **E02:** Weighted CE + PCL + RawBoost 5.
+- **E03:** Weighted CE + RawBoost 5 + non-speech DNS noise.
+- **E04:** Weighted CE + PCL + RawBoost 5 + non-speech DNS noise.
+
+The experiments share fixed training controls and use separate
+private checkpoints. Training proceeds epoch by epoch with
+full Dev evaluation and optimizer-state recovery.
+
+E01 is configured but has not yet started training.
+E02–E04 remain planned until their pipelines are implemented
+and validated.
+
+See [Experiment Plan](docs/experiments.md) for the detailed
+configuration, comparison protocol, and execution status.
