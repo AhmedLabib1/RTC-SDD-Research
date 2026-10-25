@@ -1,0 +1,75 @@
+{
+  "experiment": "e02_ce_pcl_fp32",
+  "model": {
+    "architecture": "xlsr2_300m_aasist",
+    "xlsr_trainable": true,
+    "aasist_trainable": true
+  },
+  "data": {
+    "sample_rate": 16000,
+    "audio_length": 64600,
+    "crop": "left",
+    "pad": "repeat",
+    "rawboost": {
+      "enabled": true,
+      "algorithm": 5,
+      "N_f": 5,
+      "nBands": 5,
+      "minF": 20,
+      "maxF": 8000,
+      "minBW": 100,
+      "maxBW": 1000,
+      "minCoeff": 10,
+      "maxCoeff": 100,
+      "minG": 0,
+      "maxG": 0,
+      "minBiasLinNonLin": 5,
+      "maxBiasLinNonLin": 20,
+      "P": 10,
+      "g_sd": 2
+    }
+  },
+  "training": {
+    "epochs": 1,
+    "batch_size": 2,
+    "gradient_accumulation": 8,
+    "optimizer": "adam",
+    "learning_rate": 1e-06,
+    "weight_decay": 0.0001,
+    "lr_scheduler": "none",
+    "class_weights": [
+      0.1,
+      0.9
+    ],
+    "precision": "fp32",
+    "gradient_clip_norm": 1.0,
+    "seed": 1234,
+    "workers": 2,
+    "eval_batch_size": 2,
+    "save_every_optimizer_steps": 1000,
+    "log_every_optimizer_steps": 100,
+    "early_stopping_patience": 10,
+    "max_minutes": 0.001,
+    "device": "cuda:0"
+  },
+  "evaluation": {
+    "threshold": 0.5,
+    "selection_primary": "online_dev_macro_f1",
+    "selection_official_reference": "dev_loss",
+    "evaluate_full_dev_every_epoch": true,
+    "noisy_proxy_generated": false
+  },
+  "checkpoint_backup": {
+    "enabled": true,
+    "repo_id": "AhmedLabib1/rtc-sdd-research-checkpoints",
+    "remote_prefix": "experiments/e02_ce_pcl_fp32",
+    "upload_every_optimizer_steps": 1000,
+    "upload_on_pause": true,
+    "upload_after_epoch": true,
+    "upload_best_after_epoch": true,
+    "max_attempts": 2,
+    "retry_delay_seconds": 2,
+    "create_private": false,
+    "delete_local_after_upload": false
+  }
+}

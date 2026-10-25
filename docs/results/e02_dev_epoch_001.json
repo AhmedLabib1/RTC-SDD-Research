@@ -1,0 +1,210 @@
+{
+  "epoch": 1,
+  "step": 4737,
+  "dev_weighted_loss": 0.6891188856315054,
+  "dev_online_macro_f1": 0.43691678004293555,
+  "official_hidden_weighted_f1": null,
+  "metric_kind": "clean_online_dev_only_not_competition_score",
+  "subgroups": {
+    "all_dev": {
+      "count": 15204,
+      "threshold": 0.5,
+      "accuracy": 0.47665088134701394,
+      "macro_f1": 0.4389138827655209,
+      "spoof": {
+        "precision": 0.8237632508833922,
+        "recall": 0.452853095912586,
+        "f1": 0.5844257586044811
+      },
+      "bonafide": {
+        "precision": 0.19638611507370424,
+        "recall": 0.5798525798525799,
+        "f1": 0.2934020069265607
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 5595,
+        "true_spoof_pred_bonafide": 6760,
+        "true_bonafide_pred_spoof": 1197,
+        "true_bonafide_pred_bonafide": 1652
+      }
+    },
+    "view/offline": {
+      "count": 7739,
+      "threshold": 0.5,
+      "accuracy": 0.47680578886161,
+      "macro_f1": 0.4407904191723629,
+      "spoof": {
+        "precision": 0.827576112412178,
+        "recall": 0.44965802449498965,
+        "f1": 0.5827063794702669
+      },
+      "bonafide": {
+        "precision": 0.1996298866527874,
+        "recall": 0.5943526170798898,
+        "f1": 0.29887445887445885
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 2827,
+        "true_spoof_pred_bonafide": 3460,
+        "true_bonafide_pred_spoof": 589,
+        "true_bonafide_pred_bonafide": 863
+      }
+    },
+    "view/online": {
+      "count": 7465,
+      "threshold": 0.5,
+      "accuracy": 0.4764902880107167,
+      "macro_f1": 0.43691678004293555,
+      "spoof": {
+        "precision": 0.8199052132701422,
+        "recall": 0.45616348055372447,
+        "f1": 0.5861922914019483
+      },
+      "bonafide": {
+        "precision": 0.1929567131327953,
+        "recall": 0.5647816750178954,
+        "f1": 0.28764126868392276
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 2768,
+        "true_spoof_pred_bonafide": 3300,
+        "true_bonafide_pred_spoof": 608,
+        "true_bonafide_pred_bonafide": 789
+      }
+    },
+    "language/en": {
+      "count": 5844,
+      "threshold": 0.5,
+      "accuracy": 0.5034223134839151,
+      "macro_f1": 0.4517571984133911,
+      "spoof": {
+        "precision": 0.853948791922106,
+        "recall": 0.4867420349434738,
+        "f1": 0.6200576067033254
+      },
+      "bonafide": {
+        "precision": 0.1869098013676327,
+        "recall": 0.5863125638406538,
+        "f1": 0.2834567901234568
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 2368,
+        "true_spoof_pred_bonafide": 2497,
+        "true_bonafide_pred_spoof": 405,
+        "true_bonafide_pred_bonafide": 574
+      }
+    },
+    "language/zh": {
+      "count": 9360,
+      "threshold": 0.5,
+      "accuracy": 0.4599358974358974,
+      "macro_f1": 0.4298830894512334,
+      "spoof": {
+        "precision": 0.8029360537447127,
+        "recall": 0.4308411214953271,
+        "f1": 0.5607785211573552
+      },
+      "bonafide": {
+        "precision": 0.2018348623853211,
+        "recall": 0.5764705882352941,
+        "f1": 0.2989876577451116
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 3227,
+        "true_spoof_pred_bonafide": 4263,
+        "true_bonafide_pred_spoof": 792,
+        "true_bonafide_pred_bonafide": 1078
+      }
+    },
+    "view_language/offline/en": {
+      "count": 3000,
+      "threshold": 0.5,
+      "accuracy": 0.48733333333333334,
+      "macro_f1": 0.4414314076800155,
+      "spoof": {
+        "precision": 0.8536764705882353,
+        "recall": 0.4644,
+        "f1": 0.6015544041450777
+      },
+      "bonafide": {
+        "precision": 0.18353658536585366,
+        "recall": 0.602,
+        "f1": 0.2813084112149533
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 1161,
+        "true_spoof_pred_bonafide": 1339,
+        "true_bonafide_pred_spoof": 199,
+        "true_bonafide_pred_bonafide": 301
+      }
+    },
+    "view_language/offline/zh": {
+      "count": 4739,
+      "threshold": 0.5,
+      "accuracy": 0.47014138003798267,
+      "macro_f1": 0.4397354809867837,
+      "spoof": {
+        "precision": 0.8103112840466926,
+        "recall": 0.4399260628465804,
+        "f1": 0.5702550059900736
+      },
+      "bonafide": {
+        "precision": 0.2094670145359672,
+        "recall": 0.5903361344537815,
+        "f1": 0.30921595598349383
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 1666,
+        "true_spoof_pred_bonafide": 2121,
+        "true_bonafide_pred_spoof": 390,
+        "true_bonafide_pred_bonafide": 562
+      }
+    },
+    "view_language/online/en": {
+      "count": 2844,
+      "threshold": 0.5,
+      "accuracy": 0.5203938115330521,
+      "macro_f1": 0.4624131441605991,
+      "spoof": {
+        "precision": 0.854210898796886,
+        "recall": 0.5103594080338266,
+        "f1": 0.6389624139756485
+      },
+      "bonafide": {
+        "precision": 0.19077568134171907,
+        "recall": 0.569937369519833,
+        "f1": 0.2858638743455497
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 1207,
+        "true_spoof_pred_bonafide": 1158,
+        "true_bonafide_pred_spoof": 206,
+        "true_bonafide_pred_bonafide": 273
+      }
+    },
+    "view_language/online/zh": {
+      "count": 4621,
+      "threshold": 0.5,
+      "accuracy": 0.449469811729063,
+      "macro_f1": 0.4197983023664055,
+      "spoof": {
+        "precision": 0.7952114111054508,
+        "recall": 0.4215500945179584,
+        "f1": 0.5510060007059654
+      },
+      "bonafide": {
+        "precision": 0.19413092550790068,
+        "recall": 0.5620915032679739,
+        "f1": 0.2885906040268456
+      },
+      "confusion": {
+        "true_spoof_pred_spoof": 1561,
+        "true_spoof_pred_bonafide": 2142,
+        "true_bonafide_pred_spoof": 402,
+        "true_bonafide_pred_bonafide": 516
+      }
+    }
+  },
+  "training_objective": "weighted_CE_plus_lambda_PCL",
+  "lambda_pcl": 0.1
+}
